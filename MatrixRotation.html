@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Matrix Rotator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #fbeec1, #e9f1f7);
+      color: black;
+    }
+
+    .page {
+      display: none;
+      min-height: 100vh;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+    }
+
+    .active {
+      display: flex;
+    }
+
+    .card {
+      background: white;
+      padding: 40px 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 360px;
+    }
+
+    h1, h2 {
+      margin-bottom: 20px;
+    }
+
+    .brand {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #444;
+    }
+
+    button {
+      background: #ff6f61;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: none;
+      margin: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    button:hover {
+      background: #e75d4f;
+    }
+
+    .matrix {
+      display: grid;
+      grid-template-columns: repeat(3, 60px);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    input[type="number"] {
+      height: 50px;
+      font-size: 18px;
+      text-align: center;
+      border-radius: 8px;
+      border: 2px solid #ccc;
+    }
+
+    .output {
+      background-color: #ecf0f1;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .output-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 60px);
+      gap: 10px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .cell {
+      background: white;
+      border: 2px solid #bdc3c7;
+      height: 50px;
+      font-size: 18px;
+      line-height: 50px;
+      border-radius: 8px;
+      transition: transform 0.5s;
+    }
+
+    .rotate {
+      animation: flip 0.6s ease-in-out;
+    }
+
+    @keyframes flip {
+      0%   { transform: rotateY(0deg); }
+      50%  { transform: rotateY(90deg); opacity: 0.3; }
+      100% { transform: rotateY(0deg); opacity: 1; }
+    }
+
+    footer {
+      background: linear-gradient(to right, #b2fefa, #0ed2f7);
+      padding: 20px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 16px;
+      margin-top: 40px;
+    }
+
+    .footer-note {
+      font-weight: normal;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Welcome Dashboard -->
+<div class="page active" id="welcome-page">
+  <div class="card">
+    <div class="brand">Matrix Rotator</div>
+    <h1>👋 Welcome!</h1>
+    <p>This app helps you rotate your matrix in all directions easily.</p>
+    <button onclick="goToMatrix()">🚀 Get Started</button>
+  </div>
+</div>
+
+<!-- Matrix Rotator Page -->
+<div class="page" id="matrix-page">
+  <div class="card">
+    <div class="brand">Matrix Rotator</div>
+    <h2>🧮 Rotate Your Matrix</h2>
+
+    <div class="matrix" id="matrix-input">
+      <input type="number"><input type="number"><input type="number">
+      <input type="number"><input type="number"><input type="number">
+      <input type="number"><input type="number"><input type="number">
+    </div>
+
+    <div>
+      <button onclick="rotate('90')">↻ 90° CW</button>
+      <button onclick="rotate('180')">⤾ 180°</button>
+      <button onclick="rotate('-90')">↺ 90° CCW</button>
+      <button onclick="clearMatrix()">🧹 Clear</button>
+    </div>
+
+    <div class="output">
+      <strong>Rotated Matrix:</strong>
+      <div class="output-grid" id="output-grid">
+        <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      </div>
+    </div>
+
+    <button onclick="goToWelcome()">🔙 Back to Welcome</button>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  Thank you for using the Matrix Rotator!<br>
+  <span class="footer-note">Come back anytime to rotate more 😊</span>
+</footer>
+
+<!-- JavaScript -->
+<script>
+  function goToMatrix() {
+    document.getElementById('welcome-page').classList.remove('active');
+    document.getElementById('matrix-page').classList.add('active');
+  }
+
+  function goToWelcome() {
+    clearMatrix();
+    document.getElementById('matrix-page').classList.remove('active');
+    document.getElementById('welcome-page').classList.add('active');
+  }
+
+  function getMatrix() {
+    const inputs = document.querySelectorAll('#matrix-input input');
+    const values = Array.from(inputs).map(input => parseInt(input.value || 0));
+    return [
+      values.slice(0, 3),
+      values.slice(3, 6),
+      values.slice(6, 9)
+    ];
+  }
+
+  function setOutputMatrix(mat) {
+    const cells = document.querySelectorAll('.cell');
+    const flat = mat.flat();
+    cells.forEach((cell, i) => {
+      cell.textContent = flat[i];
+      cell.classList.remove('rotate');
+      void cell.offsetWidth;
+      cell.classList.add('rotate');
+    });
+  }
+
+  function rotate(direction) {
+    const matrix = getMatrix();
+    let rotated;
+
+    if (direction === '90') {
+      rotated = matrix[0].map((_, i) => matrix.map(row => row[i]).reverse());
+    } else if (direction === '-90') {
+      rotated = matrix[0].map((_, i) => matrix.map(row => row[2 - i]));
+    } else if (direction === '180') {
+      rotated = matrix.map(row => row.slice().reverse()).reverse();
+    }
+
+    setOutputMatrix(rotated);
+  }
+
+  function clearMatrix() {
+    document.querySelectorAll('#matrix-input input').forEach(input => input.value = '');
+    document.querySelectorAll('.cell').forEach(cell => {
+      cell.textContent = '';
+      cell.classList.remove('rotate');
+    });
+  }
+</script>
+
+</body>
+</html>
